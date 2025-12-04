@@ -11,19 +11,21 @@ export default function Home() {
   ]
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-12 text-white">
-      {/* Hero Section */}
-      <section className="text-center space-y-6">
-        <h1 className="text-4xl font-bold">Schwimmdaten-Analyse</h1>
-        <p className="text-white/80">Profile, Bestzeiten und Trainingstimer</p>
-        <div className="flex items-center justify-center gap-3">
+    <main className="min-h-screen bg-gradient-to-br from-blue-500 via-cyan-600 to-indigo-700 
+                     flex flex-col items-center justify-center gap-8 p-8">
+      
+      {/* Box 1: Hero mit Buttons */}
+      <section className="bg-black/40 backdrop-blur rounded-lg p-6 w-full max-w-lg text-center text-white shadow-lg">
+        <h1 className="text-3xl font-bold mb-4">Schwimmdaten-Analyse</h1>
+        <p className="text-gray-200 mb-6">Profile, Bestzeiten und Trainingstimer</p>
+        <div className="flex justify-center gap-3">
           <Button href="/schwimmer">Schwimmer anzeigen</Button>
           <Button href="/timer">Trainingstimer erstellen</Button>
         </div>
       </section>
 
-      {/* Leaderboard Section */}
-      <section className="bg-white/10 backdrop-blur rounded-lg p-6 w-full max-w-md">
+      {/* Box 2: Leaderboard */}
+      <section className="bg-black/40 backdrop-blur rounded-lg p-6 w-full max-w-lg text-white shadow-lg">
         <h2 className="text-xl font-semibold mb-4">Leaderboard</h2>
         <ul>
           {leaderboard.map((user, index) => (
@@ -34,10 +36,18 @@ export default function Home() {
               <span className="font-medium">
                 {index + 1}. {user.name}
               </span>
-              <span className="text-white/80">{user.points} Punkte</span>
+              <span className="text-cyan-300">{user.points} Punkte</span>
             </li>
           ))}
         </ul>
+      </section>
+
+      {/* Box 3: Info */}
+      <section className="bg-black/40 backdrop-blur rounded-lg p-6 w-full max-w-lg text-white shadow-lg">
+        <h2 className="text-xl font-semibold mb-4">Info</h2>
+        <p className="text-gray-200">
+          Willkommen beim Habit Tracker 🏊‍♂️ – erfasse deine täglichen Schwimm-Habits und vergleiche dich mit anderen.
+        </p>
       </section>
     </main>
   )

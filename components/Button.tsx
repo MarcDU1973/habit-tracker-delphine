@@ -11,14 +11,11 @@ export default function Button({ href, children }: Props) {
     <Link
       href={href}
       className="inline-flex items-center gap-2 rounded-full px-5 py-3
-                 bg-white/10 text-white backdrop-blur
-                 ring-1 ring-white/30 hover:bg-white/20
-                 transition-colors duration-200
-                 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+                 bg-cyan-500 text-white font-medium
+                 hover:bg-cyan-600 transition-colors duration-200
+                 focus:outline-none focus:ring-2 focus:ring-cyan-300 shadow-md"
     >
-      {/* Optional Icon */}
-      <span className="text-xl">🏊‍♂️</span>
-      <span className="font-medium">{children}</span>
+      {children}
     </Link>
   )
 }
