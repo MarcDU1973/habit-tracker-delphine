@@ -11,16 +11,15 @@ export default function Home() {
   ]
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-500 via-cyan-600 to-indigo-700 
-                     flex flex-col items-center justify-center gap-8 p-8">
+    <main className="flex flex-col items-center justify-center gap-8 p-8">
       
       {/* Box 1: Hero mit Buttons */}
       <section className="bg-black/40 backdrop-blur rounded-lg p-6 w-full max-w-lg text-center text-white shadow-lg">
-        <h1 className="text-3xl font-bold mb-4">Schwimmdaten-Analyse</h1>
-        <p className="text-gray-200 mb-6">Profile, Bestzeiten und Trainingstimer</p>
+        <h1 className="text-3xl font-bold mb-4">🏊‍♂️ Delphine Habit Tracker 🏊‍♂️</h1>
+        <p className="text-gray-200 mb-6">Training und (gute) habits erfassen</p>
         <div className="flex justify-center gap-3">
           <Button href="/schwimmer">Schwimmer anzeigen</Button>
-          <Button href="/timer">Trainingstimer erstellen</Button>
+          <Button href="/habit">Habit erfassen</Button>
         </div>
       </section>
 
