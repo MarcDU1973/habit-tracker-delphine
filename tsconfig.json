@@ -5,7 +5,11 @@
       "dom.iterable",
       "esnext"
     ],
-    "allowJs": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
+      "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
