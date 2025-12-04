@@ -1,4 +1,6 @@
 // app/page.tsx
+import Button from '@/components/Button'
+
 export default function Home() {
   const leaderboard = [
     { name: "Anna", points: 42 },
@@ -7,6 +9,24 @@ export default function Home() {
     { name: "David", points: 25 },
     { name: "Eva", points: 20 },
   ]
+
+
+
+export default function Home() {
+  return (
+    <main className="min-h-screen flex items-center justify-center">
+      <section className="text-center text-white space-y-6">
+        <h1 className="text-4xl font-bold">Schwimmdaten-Analyse</h1>
+        <p className="text-white/80">Profile, Bestzeiten und Trainingstimer</p>
+        <div className="flex items-center justify-center gap-3">
+          <Button href="/schwimmer">Schwimmer anzeigen</Button>
+          <Button href="/timer">Trainingstimer erstellen</Button>
+        </div>
+      </section>
+    </main>
+  )
+}
+
 
   return (
     <div>
