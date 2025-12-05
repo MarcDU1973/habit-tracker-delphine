@@ -19,6 +19,8 @@ export default async function HabitPage() {
     )
   }
 
+  
+
   const { data: habits, error } = await supabase.from('habits').select('*')
 
   if (error) {
