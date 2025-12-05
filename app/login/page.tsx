@@ -1,9 +1,13 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+
 
 export default function LoginPage() {
   const [username, setUsername] = useState("")
+  const router = useRouter()
+
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -15,8 +19,9 @@ export default function LoginPage() {
     })
 
     if (res.ok) {
-      // Weiterleitung zur Habit-Seite
-      window.location.href = "/habit"
+   // ✅ Weiterleitung nach erfolgreichem Login
+   router.push("/habit")
+
     } else {
       alert("Login fehlgeschlagen")
     }

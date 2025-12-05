@@ -11,10 +11,25 @@ export default async function ProtectedLayout({ children }: { children: React.Re
   }
 
   return (
-    <section className="min-h-screen bg-gray-900 text-white">
-      <header className="p-4 flex justify-between items-center bg-black/40">
-        <h1 className="font-bold">Habit App</h1>
-        {/* Variante 2: Link zur Logout-Seite */}
+    <section className="min-h-screen bg-gradient-to-br from-sky-200 via-sky-500 to-sky-700 text-white">
+      <header className="p-4 flex justify-between items-center bg-black/40 backdrop-blur">
+        {/* Navigation links oben links */}
+        <nav className="flex gap-6">
+          <Link href="/" className="hover:text-yellow-300 font-semibold">
+            Dashboard
+          </Link>
+          <Link href="/schwimmer" className="hover:text-yellow-300 font-semibold">
+            Schwimmer
+          </Link>
+          <Link href="/habits" className="hover:text-yellow-300 font-semibold">
+            Habits
+          </Link>
+        </nav>
+
+        {/* App-Titel mittig */}
+        <h1 className="font-bold text-lg">Habit App</h1>
+
+        {/* Logout rechts */}
         <Link
           href="/logout"
           className="bg-red-600 px-4 py-2 rounded hover:bg-red-700"
@@ -22,6 +37,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
           Logout
         </Link>
       </header>
+
       <main className="p-8">{children}</main>
     </section>
   )

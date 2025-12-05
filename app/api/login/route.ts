@@ -7,10 +7,16 @@ export async function POST(request: Request) {
 
   // Direkt den passenden Benutzer holen
   const { data: user, error } = await supabase
-    .from("login")
+    .from("users")
     .select("*")
     .eq("username", cleanUsername)
     .single() // liefert direkt ein Objekt statt Array
+    
+    console.log("Supabase result:", { user, error })
+    if (error) {
+      return NextResponse.json({ error: "User nicht gefunden" }, { status: 401 })
+    }
+    
 
   if (error || !user) {
     return NextResponse.json({ error: "User nicht gefunden" }, { status: 401 })
