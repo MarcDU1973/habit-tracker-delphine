@@ -8,8 +8,7 @@ export default function HabitClient({ user }: { user: string }) {
 
   useEffect(() => {
     
-  console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-  console.log("Supabase Key:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
 
     const fetchData = async () => {
       const { data: habitsData } = await supabase.from("habits").select("*")
