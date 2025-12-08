@@ -7,6 +7,10 @@ export default function HabitClient({ user }: { user: string }) {
   const [tracking, setTracking] = useState<Record<string, any>>({})
 
   useEffect(() => {
+    
+  console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+  console.log("Supabase Key:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
     const fetchData = async () => {
       const { data: habitsData } = await supabase.from("habits").select("*")
       setHabits(habitsData || [])
@@ -28,11 +32,12 @@ export default function HabitClient({ user }: { user: string }) {
     const { data: existing } = await supabase
       .from("tracking")
       .select("*")
-      .eq("user", user)
+      .eq("user_id", user)
       .eq("habit", habitId)
       .eq("date", today)
       .single()
 
+      
     let newCount = 0
     if (checked) {
       newCount = existing ? existing.count + 1 : 1
@@ -40,17 +45,25 @@ export default function HabitClient({ user }: { user: string }) {
       newCount = 0
     }
 
+    console.log("Upsert Payload:", {
+      user_id: user,
+      habit: habitId,
+      completed: checked,
+      date: today,
+      count: newCount
+    });
+    
     await supabase
       .from("tracking")
       .upsert({
-        user,
+        user_id: user,
         habit: habitId,
         completed: checked,
         date: today,
         count: newCount,
         target_count: existing?.target_count ?? 1,
         last_update: new Date().toISOString(),
-      }, { onConflict: "user,habit,date" })
+      }, { onConflict: "user_id,habit,date" })
 
     setTracking(prev => ({
       ...prev,
