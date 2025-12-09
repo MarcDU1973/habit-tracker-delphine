@@ -1,78 +1,136 @@
-"use client"
-import { useState, useEffect } from "react"
-import { supabase } from "@/lib/supabaseClient"
+
+"use client";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
+
+interface Habit {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+interface Tracking {
+  habit: string;
+  completed: boolean;
+  count: number;
+  target_count: number;
+}
 
 export default function HabitClient({ user }: { user: string }) {
-  const [habits, setHabits] = useState<any[]>([])
-  const [tracking, setTracking] = useState<Record<string, any>>({})
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [tracking, setTracking] = useState<Record<string, Tracking>>({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    
-
-
     const fetchData = async () => {
-      const { data: habitsData } = await supabase.from("habits").select("*")
-      setHabits(habitsData || [])
+      try {
+        const { data: habitsData, error: habitsError } = await supabase.from("habits").select("*");
+        if (habitsError) throw habitsError;
+        setHabits(habitsData || []);
 
-      const { data: trackingData } = await supabase.from("tracking").select("*")
-      const map: Record<string, any> = {}
-      trackingData?.forEach(t => {
-        map[t.habit] = t
-      })
-      setTracking(map)
+        const { data: trackingData, error: trackingError } = await supabase
+          .from("tracking")
+          .select("*")
+          .eq("user_id", user);
+        if (trackingError) throw trackingError;
+
+        const map: Record<string, Tracking> = {};
+        trackingData?.forEach((t) => {
+          map[t.habit] = t;
+        });
+        setTracking(map);
+      } catch (err: any) {
+        console.error("Fehler beim Laden:", err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchData();
+    } else {
+      setLoading(false);
     }
-    fetchData()
-  }, [])
+  }, [user]);
 
   const toggleHabit = async (habitId: string, checked: boolean) => {
-    if (!user) return
-    const today = new Date().toISOString().split("T")[0]
+    if (!user) return;
+    const today = new Date().toISOString().split("T")[0];
+    const current = tracking[habitId];
+    const newCount = checked ? (current ? current.count : 1) : 0;
 
-    const { data: existing } = await supabase
-      .from("tracking")
-      .select("*")
-      .eq("user_id", user)
-      .eq("habit", habitId)
-      .eq("date", today)
-      .single()
+    try {
+      const { error } = await supabase
+        .from("tracking")
+        .upsert(
+          {
+            user_id: user,
+            habit: habitId,
+            completed: checked,
+            date: today,
+            count: newCount,
+            target_count: current?.target_count ?? 1,
+            last_update: new Date().toISOString(),
+          },
+          { onConflict: "user_id,habit,date" }
+        );
 
-      
-    let newCount = 0
-    if (checked) {
-      newCount = existing ? existing.count + 1 : 1
-    } else {
-      newCount = 0
+      if (error) throw error;
+
+      setTracking((prev) => ({
+        ...prev,
+        [habitId]: {
+          ...prev[habitId],
+          completed: checked,
+          count: newCount,
+          target_count: current?.target_count ?? 1,
+        },
+      }));
+    } catch (err: any) {
+      console.error("Fehler beim Upsert:", err.message);
     }
+  };
 
-    console.log("Upsert Payload:", {
-      user_id: user,
-      habit: habitId,
-      completed: checked,
-      date: today,
-      count: newCount
-    });
-    
-    await supabase
-      .from("tracking")
-      .upsert({
-        user_id: user,
-        habit: habitId,
-        completed: checked,
-        date: today,
-        count: newCount,
-        target_count: existing?.target_count ?? 1,
-        last_update: new Date().toISOString(),
-      }, { onConflict: "user_id,habit,date" })
+  const incrementHabit = async (habitId: string) => {
+    if (!user) return;
+    const today = new Date().toISOString().split("T")[0];
+    const current = tracking[habitId];
+    const newCount = current ? current.count + 1 : 1;
 
-    setTracking(prev => ({
-      ...prev,
-      [habitId]: {
-        ...prev[habitId],
-        completed: checked,
-        count: newCount,
-        target_count: existing?.target_count ?? 1
-      }
-    }))
+    try {
+      const { error } = await supabase
+        .from("tracking")
+        .upsert(
+          {
+            user_id: user,
+            habit: habitId,
+            completed: newCount >= (current?.target_count ?? 1),
+            date: today,
+            count: newCount,
+            target_count: current?.target_count ?? 1,
+            last_update: new Date().toISOString(),
+          },
+          { onConflict: "user_id,habit,date" }
+        );
+
+      if (error) throw error;
+
+      setTracking((prev) => ({
+        ...prev,
+        [habitId]: {
+          ...prev[habitId],
+          completed: newCount >= (current?.target_count ?? 1),
+          count: newCount,
+          target_count: current?.target_count ?? 1,
+        },
+      }));
+    } catch (err: any) {
+      console.error("Fehler beim Increment:", err.message);
+    }
+  };
+
+  if (loading) {
+    return <p className="text-center text-gray-500">Lade Daten...</p>;
   }
 
   return (
@@ -83,7 +141,7 @@ export default function HabitClient({ user }: { user: string }) {
           Eingeloggt als <span className="font-semibold">{user}</span>
         </p>
         <ul>
-          {habits?.map((habit: any, index: number) => (
+          {habits.map((habit, index) => (
             <li
               key={habit.id}
               className="flex items-center justify-between py-3 border-b border-white/20 last:border-b-0"
@@ -99,16 +157,24 @@ export default function HabitClient({ user }: { user: string }) {
                   </span>
                 )}
               </div>
-              <input
-                type="checkbox"
-                checked={tracking[habit.id]?.completed || false}
-                onChange={e => toggleHabit(habit.id, e.target.checked)}
-                className="w-5 h-5 accent-green-500 cursor-pointer"
-              />
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={tracking[habit.id]?.completed || false}
+                  onChange={(e) => toggleHabit(habit.id, e.target.checked)}
+                  className="w-5 h-5 accent-green-500 cursor-pointer"
+                />
+                <button
+                  onClick={() => incrementHabit(habit.id)}
+                  className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 text-sm"
+                >
+                  +1
+                </button>
+              </div>
             </li>
           ))}
         </ul>
       </section>
     </main>
-  )
+  );
 }
