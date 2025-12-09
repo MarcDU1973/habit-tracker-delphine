@@ -28,7 +28,7 @@ export default function SchwimmerPage() {
   const [habitNames, setHabitNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
-  // Schwimmer laden
+  // Schwimmer laden und nach team gruppieren
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -79,7 +79,7 @@ export default function SchwimmerPage() {
       const { data, error } = await supabase
         .from("tracking")
         .select("habit, completed, count, target_count")
-        .eq("user_id", username)
+        .eq("user_id", username) // tracking.user_id enthält den Benutzernamen
         .eq("date", today);
 
       if (error) throw error;
@@ -126,7 +126,7 @@ export default function SchwimmerPage() {
       {/* Modal für Habit-Details */}
       {selectedUser && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg text-black">
             <h2 className="text-xl font-bold mb-4">
               {selectedUser.username} – Habits heute
             </h2>
