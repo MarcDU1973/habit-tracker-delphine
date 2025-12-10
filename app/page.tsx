@@ -15,7 +15,7 @@ export default function HomePage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [mode, setMode] = useState<RangeMode>("today"); // "today" | "all"
+  const [mode, setMode] = useState<RangeMode>("today");
 
   const todayStr = () => new Date().toISOString().split("T")[0];
 
@@ -26,7 +26,6 @@ export default function HomePage() {
 
       try {
         let query = supabase.from("tracking").select("user_id, count, date");
-
         if (mode === "today") {
           query = query.eq("date", todayStr());
         }
@@ -34,7 +33,6 @@ export default function HomePage() {
         const { data, error } = await query;
         if (error) throw error;
 
-        // Aggregation im Client: Summe count pro user_id
         const totals: Record<string, number> = {};
         (data ?? []).forEach((row: any) => {
           const uid = row.user_id as string;
@@ -59,7 +57,6 @@ export default function HomePage() {
     fetchLeaderboard();
   }, [mode]);
 
-  // Max-Wert für Progress-Balken
   const maxPoints = useMemo(() => {
     return leaderboard.length ? Math.max(...leaderboard.map((e) => e.total)) : 0;
   }, [leaderboard]);
@@ -68,13 +65,12 @@ export default function HomePage() {
     if (index === 0) return "bg-yellow-400 text-black"; // Gold
     if (index === 1) return "bg-gray-300 text-black";   // Silber
     if (index === 2) return "bg-orange-400 text-black"; // Bronze
-    // Standard (dunkles Card-Design passend zum Layout)
     return "bg-black/40 text-white";
   };
 
   return (
     <main className="flex flex-col items-center justify-center gap-8 p-8">
-      {/* Box 1: Hero mit Buttons */}
+      {/* Box 1: Hero */}
       <section className="bg-black/40 backdrop-blur rounded-lg p-6 w-full max-w-lg text-center text-white shadow-lg">
         <h1 className="text-3xl font-bold mb-4">🏊‍♂️ Delphine Habit Tracker 🏊‍♂️</h1>
         <p className="text-gray-200 mb-6">Training und (gute) Habits erfassen</p>
@@ -84,35 +80,41 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Schalter Heute | Gesamt mittig */}
+      <div className="flex justify-center mb-2">
+        <div className="flex gap-2 bg-black/30 rounded-lg p-2">
+          <button
+            onClick={() => setMode("today")}
+            className={`px-4 py-2 rounded ${
+              mode === "today"
+                ? "bg-white text-blue-700 font-semibold"
+                : "bg-white/10 text-white hover:bg-white/20"
+            }`}
+          >
+            Heute
+          </button>
+          <button
+            onClick={() => setMode("all")}
+            className={`px-4 py-2 rounded ${
+              mode === "all"
+                ? "bg-white text-blue-700 font-semibold"
+                : "bg-white/10 text-white hover:bg-white/20"
+            }`}
+          >
+            Gesamt
+          </button>
+        </div>
+      </div>
+
       {/* Box 2: Leaderboard */}
       <section className="bg-black/40 backdrop-blur rounded-lg p-6 w-full max-w-lg text-white shadow-lg">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">🏆 Leaderboard</h2>
-          {/* Filter Toggle: Heute vs. Gesamt */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setMode("today")}
-              className={`px-3 py-1 rounded ${mode === "today" ? "bg-white text-blue-700 font-semibold" : "bg-white/10 text-white hover:bg-white/20"}`}
-              aria-pressed={mode === "today"}
-            >
-              Heute
-            </button>
-            <button
-              onClick={() => setMode("all")}
-              className={`px-3 py-1 rounded ${mode === "all" ? "bg-white text-blue-700 font-semibold" : "bg-white/10 text-white hover:bg-white/20"}`}
-              aria-pressed={mode === "all"}
-            >
-              Gesamt
-            </button>
-          </div>
-        </div>
-
+        <h2 className="text-xl font-semibold mb-4 text-center">🏆 Leaderboard</h2>
         {loading ? (
-          <p className="text-gray-300">Lade Daten...</p>
+          <p className="text-gray-300 text-center">Lade Daten...</p>
         ) : errorMsg ? (
-          <p className="text-red-300">{errorMsg}</p>
+          <p className="text-red-300 text-center">{errorMsg}</p>
         ) : leaderboard.length === 0 ? (
-          <p className="text-gray-300">
+          <p className="text-gray-300 text-center">
             {mode === "today"
               ? "Heute wurden noch keine Punkte erfasst."
               : "Es liegen noch keine Punkte vor."}
@@ -130,8 +132,6 @@ export default function HomePage() {
                   </span>
                   <span className="font-bold">{entry.total} Punkte</span>
                 </div>
-
-                {/* Fortschrittsbalken relativ zum Top-Wert */}
                 {maxPoints > 0 && (
                   <div className="mt-2 w-full bg-white/20 rounded h-2">
                     <div
@@ -146,7 +146,18 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Box 3: Info */}
+      {/* Box 3: Tagesbestleistung }
+      {mode === "today" && leaderboard.length > 0 && (
+        <section className="bg-green-600 backdrop-blur rounded-lg p-6 w-full max-w-lg text-white shadow-lg">
+          <h2 className="text-xl font-semibold mb-4">🌟 Tagesbestleistung</h2>
+          <div className="flex flex-col items-center">
+            <span className="text-2xl font-bold">{leaderboard[0].user_id}</span>
+            <p className="text-lg mt-2">{leaderboard[0].total} Punkte heute!</p>
+          </div>
+        </section>
+      )}*/}
+
+      {/* Box 4: Info */}
       <section className="bg-black/40 backdrop-blur rounded-lg p-6 w-full max-w-lg text-white shadow-lg">
         <h2 className="text-xl font-semibold mb-4">ℹ️ Info</h2>
         <p className="text-gray-200">
