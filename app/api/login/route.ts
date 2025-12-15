@@ -1,4 +1,5 @@
 
+// app/api/login/route.ts
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabaseServer";
 
@@ -13,34 +14,37 @@ export async function POST(request: Request) {
 
     const supabase = createSupabaseServer();
 
-    // Nutzer aus eigener Tabelle 'users' holen
     const { data: user, error } = await supabase
       .from("users")
       .select("*")
       .eq("username", cleanUsername)
       .single();
 
-    // Debug (nur serverseitig)
     console.log("Supabase result:", { user, error });
 
     if (error || !user) {
       return NextResponse.json({ error: "User nicht gefunden" }, { status: 401 });
     }
 
-    // Erfolg → Cookie setzen (clientseitig lesbar, da NICHT httpOnly)
-    const res = NextResponse.json({ success: true, username: user.username });
+    // Response + Cookie
+    const res = NextResponse.json(
+      { success: true, username: user.username },
+      { status: 200, headers: {
+        // Caching vermeiden
+        "Cache-Control": "no-store, max-age=0",
+        "Pragma": "no-cache",
+        "Expires": "0",
+      }}
+    );
 
-    // WICHTIG: httpOnly NICHT setzen, wenn du den Cookie im Browser-Skript auslesen willst.
-
-// app/api/login/route.ts (Ausschnitt; du hast sie schon)
-res.cookies.set("user", user.username, {
-  httpOnly: false,
-  sameSite: "lax",
-  secure: process.env.NODE_ENV === "production",
-  path: "/",
-  maxAge: 60 * 60 * 24 * 365,
-});
-
+    // Cookie 1 Jahr gültig
+    res.cookies.set("user", user.username, {
+      httpOnly: false, // Client soll ihn lesen können
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365, // 1 Jahr
+    });
 
     return res;
   } catch (e: any) {
